@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Square, AlertCircle } from 'lucide-react';
+import { convertBlobToWav } from '../../utils/audioConverter';
 
 interface MicrophoneRecorderProps {
   onRecordingComplete: (blob: Blob, audioUrl: string) => void;
@@ -68,10 +69,11 @@ export const MicrophoneRecorder: React.FC<MicrophoneRecorderProps> = ({
         }
       };
 
-      recorder.onstop = () => {
-        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        onRecordingComplete(audioBlob, audioUrl);
+      recorder.onstop = async () => {
+        const rawBlob = new Blob(chunksRef.current, { type: mimeType });
+        const wavBlob = await convertBlobToWav(rawBlob);
+        const audioUrl = URL.createObjectURL(wavBlob);
+        onRecordingComplete(wavBlob, audioUrl);
         // Release hardware mic track
         stream.getTracks().forEach((track) => track.stop());
       };

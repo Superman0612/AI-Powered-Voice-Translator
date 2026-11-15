@@ -13,26 +13,49 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     
-    # Database
-    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
-    POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
-    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "password")
-    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "bhashaai")
-    POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
-    
-    @property
-    def SQLALCHEMY_DATABASE_URI(self) -> str:
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-    
-    @property
-    def ASYNC_SQLALCHEMY_DATABASE_URI(self) -> str:
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-    
     # Storage Paths
     BASE_DIR: str = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
     STORAGE_DIR: str = os.path.join(BASE_DIR, "storage", "audio")
     UPLOADS_DIR: str = os.path.join(STORAGE_DIR, "uploads")
     GENERATED_DIR: str = os.path.join(STORAGE_DIR, "generated")
+
+    # Database & Supabase Configuration
+    DATABASE_URL: Optional[str] = None
+    SUPABASE_URL: Optional[str] = None
+    SUPABASE_KEY: Optional[str] = None
+    SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
+    SUPABASE_STORAGE_BUCKET: str = "bhashaai-audio"
+    USE_POSTGRES: bool = False
+    POSTGRES_SERVER: str = "localhost"
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "password"
+    POSTGRES_DB: str = "bhashaai"
+    POSTGRES_PORT: str = "5432"
+    
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        url = self.DATABASE_URL or os.getenv("DATABASE_URL")
+        if url:
+            # Normalize Supabase / PostgreSQL URI for psycopg2
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+            elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
+                url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+            # Ensure sslmode=require for Supabase hosted connections
+            if ("supabase.co" in url or "supabase.com" in url or "pooler.supabase.com" in url) and "sslmode" not in url:
+                delimiter = "&" if "?" in url else "?"
+                url = f"{url}{delimiter}sslmode=require"
+            return url
+        if self.USE_POSTGRES:
+            return f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        db_path = os.path.join(self.BASE_DIR, "bhashaai.db").replace("\\", "/")
+        return f"sqlite:///{db_path}"
+    
+    @property
+    def ASYNC_SQLALCHEMY_DATABASE_URI(self) -> str:
+        if self.DATABASE_URL and "sqlite" in self.DATABASE_URL:
+            return self.DATABASE_URL
+        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
     
     # Audio Constraints
     MAX_UPLOAD_SIZE_MB: int = 25
@@ -49,7 +72,11 @@ class Settings(BaseSettings):
     
     class Config:
         case_sensitive = True
-        env_file = ".env"
+        env_file = (
+            os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")), ".env"),
+            os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")), ".env"),
+            ".env"
+        )
         extra = "allow"
 
 settings = Settings()

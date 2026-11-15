@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { UploadCloud, FileAudio, X, AlertCircle } from 'lucide-react';
 import { AudioPlayer } from '../common/AudioPlayer';
+import { convertBlobToWav } from '../../utils/audioConverter';
 
 interface AudioUploaderProps {
   onFileSelected: (file: File) => void;
@@ -21,13 +22,13 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const allowedExtensions = ['.wav', '.mp3', '.ogg', '.flac', '.m4a'];
+  const allowedExtensions = ['.wav', '.mp3', '.ogg', '.flac', '.m4a', '.webm'];
 
-  const validateAndHandle = (file: File) => {
+  const validateAndHandle = async (file: File) => {
     setValidationError(null);
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
     if (!allowedExtensions.includes(ext)) {
-      setValidationError(`Unsupported audio format '${ext}'. Allowed: WAV, MP3, OGG, FLAC, M4A.`);
+      setValidationError(`Unsupported audio format '${ext}'. Allowed: WAV, MP3, OGG, FLAC, M4A, WEBM.`);
       return;
     }
 
@@ -35,6 +36,17 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({
     if (file.size > maxSizeMB * 1024 * 1024) {
       setValidationError(`File exceeds maximum size limit of ${maxSizeMB}MB.`);
       return;
+    }
+
+    if (ext === '.webm') {
+      try {
+        const wavBlob = await convertBlobToWav(file);
+        const wavFile = new File([wavBlob], file.name.replace(/\.[^/.]+$/, ".wav"), { type: 'audio/wav' });
+        onFileSelected(wavFile);
+        return;
+      } catch (e) {
+        console.warn("Conversion of webm failed", e);
+      }
     }
 
     onFileSelected(file);

@@ -37,6 +37,8 @@ ENV/
 .env.local
 .env.*.local
 *.env
+*.db
+*.sqlite3
 
 # Audio Storage (User uploads & generated audio waveforms)
 storage/audio/uploads/*

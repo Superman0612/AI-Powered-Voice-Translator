@@ -126,7 +126,7 @@ export const TranslatorPage: React.FC = () => {
     }
 
     const formData = new FormData();
-    const fileName = inputMode === 'mic' ? 'mic_recording.webm' : (uploadedFile?.name || 'uploaded_voice.wav');
+    const fileName = inputMode === 'mic' ? 'mic_recording.wav' : (uploadedFile?.name || 'uploaded_voice.wav');
     formData.append('file', audioBlob, fileName);
     formData.append('target_language', targetLang);
     if (sourceLang !== 'auto') {
