@@ -32,11 +32,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const fillAdminAccount = () => {
-    setEmail('shubhamdevatwal2121@gmail.com');
-    setPassword('Shubham@404');
-  };
-
   return (
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md p-8 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-2xl space-y-6">
@@ -107,19 +102,7 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Quick Admin Fill */}
-        <div className="pt-2 border-t border-slate-800/80 space-y-2">
-          <button
-            type="button"
-            onClick={fillAdminAccount}
-            className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 text-center font-medium text-xs transition-colors flex items-center justify-center gap-1.5"
-          >
-            <Lock className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Fill Master Admin Credentials</span>
-          </button>
-        </div>
-
-        <p className="text-center text-xs text-slate-400 pt-1">
+        <p className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800/80">
           New Student or Researcher?{' '}
           <Link to="/register" className="font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
             Create your Profile
