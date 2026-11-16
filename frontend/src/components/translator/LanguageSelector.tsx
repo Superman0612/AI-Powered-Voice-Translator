@@ -12,6 +12,19 @@ interface LanguageSelectorProps {
   disabled?: boolean;
 }
 
+const FALLBACK_LANGUAGES: Language[] = [
+  { id: 1, code_iso_639_1: 'hi', code_iso_639_3: 'hin', name: 'Hindi', native_name: 'हिन्दी', script_name: 'Devanagari', nllb_code: 'hin_Deva', indictrans_code: 'hin_Deva', whisper_code: 'hi', supports_asr: true, supports_nmt: true, supports_tts: true },
+  { id: 2, code_iso_639_1: 'en', code_iso_639_3: 'eng', name: 'English', native_name: 'English', script_name: 'Latin', nllb_code: 'eng_Latn', indictrans_code: 'eng_Latn', whisper_code: 'en', supports_asr: true, supports_nmt: true, supports_tts: true },
+  { id: 3, code_iso_639_1: 'gu', code_iso_639_3: 'guj', name: 'Gujarati', native_name: 'ગુજરાતી', script_name: 'Gujarati', nllb_code: 'guj_Gujr', indictrans_code: 'guj_Gujr', whisper_code: 'gu', supports_asr: true, supports_nmt: true, supports_tts: true },
+  { id: 4, code_iso_639_1: 'mr', code_iso_639_3: 'mar', name: 'Marathi', native_name: 'मराठी', script_name: 'Devanagari', nllb_code: 'mar_Deva', indictrans_code: 'mar_Deva', whisper_code: 'mr', supports_asr: true, supports_nmt: true, supports_tts: true },
+  { id: 5, code_iso_639_1: 'bn', code_iso_639_3: 'ben', name: 'Bengali', native_name: 'বাংলা', script_name: 'Bengali', nllb_code: 'ben_Beng', indictrans_code: 'ben_Beng', whisper_code: 'bn', supports_asr: true, supports_nmt: true, supports_tts: true },
+  { id: 6, code_iso_639_1: 'ta', code_iso_639_3: 'tam', name: 'Tamil', native_name: 'தமிழ்', script_name: 'Tamil', nllb_code: 'tam_Taml', indictrans_code: 'tam_Taml', whisper_code: 'ta', supports_asr: true, supports_nmt: true, supports_tts: true },
+  { id: 7, code_iso_639_1: 'te', code_iso_639_3: 'tel', name: 'Telugu', native_name: 'తెలుగు', script_name: 'Telugu', nllb_code: 'tel_Telu', indictrans_code: 'tel_Telu', whisper_code: 'te', supports_asr: true, supports_nmt: true, supports_tts: true },
+  { id: 8, code_iso_639_1: 'kn', code_iso_639_3: 'kan', name: 'Kannada', native_name: 'ಕನ್ನಡ', script_name: 'Kannada', nllb_code: 'kan_Knda', indictrans_code: 'kan_Knda', whisper_code: 'kn', supports_asr: true, supports_nmt: true, supports_tts: true },
+  { id: 9, code_iso_639_1: 'ml', code_iso_639_3: 'mal', name: 'Malayalam', native_name: 'മലയാളം', script_name: 'Malayalam', nllb_code: 'mal_Mlym', indictrans_code: 'mal_Mlym', whisper_code: 'ml', supports_asr: true, supports_nmt: true, supports_tts: true },
+  { id: 10, code_iso_639_1: 'pa', code_iso_639_3: 'pan', name: 'Punjabi', native_name: 'ਪੰਜਾਬੀ', script_name: 'Gurmukhi', nllb_code: 'pan_Guru', indictrans_code: 'pan_Guru', whisper_code: 'pa', supports_asr: true, supports_nmt: true, supports_tts: true }
+];
+
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   languages,
   sourceLanguage,
@@ -21,6 +34,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onSwap,
   disabled = false
 }) => {
+  const activeLanguages = languages && languages.length > 0 ? languages : FALLBACK_LANGUAGES;
   return (
     <div className="flex flex-col sm:flex-row items-center gap-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg">
       {/* Source Language */}
@@ -36,7 +50,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-medium text-white appearance-none cursor-pointer hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-colors disabled:opacity-50"
           >
             <option value="auto">✨ Auto Detect Language</option>
-            {languages.map((lang) => (
+            {activeLanguages.map((lang) => (
               <option key={`src-${lang.code_iso_639_1}`} value={lang.code_iso_639_1}>
                 {lang.name} ({lang.native_name})
               </option>
@@ -77,7 +91,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             disabled={disabled}
             className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-medium text-white appearance-none cursor-pointer hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-colors disabled:opacity-50"
           >
-            {languages.map((lang) => (
+            {activeLanguages.map((lang) => (
               <option key={`tgt-${lang.code_iso_639_1}`} value={lang.code_iso_639_1}>
                 {lang.name} ({lang.native_name})
               </option>
