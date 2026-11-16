@@ -143,9 +143,29 @@ VALUES
 ON CONFLICT (model_id) DO NOTHING;
 
 -- ==============================================================================
--- SEED DATA: Master Admin Account (shubhamdevatwal2121@gmail.com / Shubham@404)
+-- CLEANUP & SEED DATA: Master Admin Account (shubhamdevatwal2121@gmail.com / Shubham@404)
 -- ==============================================================================
+-- Purge legacy demo accounts so only real users exist
+DELETE FROM users WHERE email IN ('admin@bhashaai.org', 'user@bhashaai.org');
+
+-- Insert or update Master Admin
 INSERT INTO users (id, email, username, hashed_password, full_name, is_active, is_admin)
 VALUES
 ('00000000-0000-0000-0000-000000000001', 'shubhamdevatwal2121@gmail.com', 'shubhamdevatwal', '$2b$12$55fgV84ztdKtZLIhLbUr2eb7m3mnNb6Chtf/cOLXUICWp53pmFz2.', 'Shubham Devatwal', TRUE, TRUE)
 ON CONFLICT (email) DO UPDATE SET hashed_password = EXCLUDED.hashed_password, is_admin = TRUE;
+
+-- ==============================================================================
+-- PERMISSIONS & RLS CONFIGURATION
+-- ==============================================================================
+-- Disable Row Level Security on all tables so backend service can read/write freely
+ALTER TABLE languages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE model_registry DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE audio_files DISABLE ROW LEVEL SECURITY;
+ALTER TABLE evaluation_runs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE evaluation_results DISABLE ROW LEVEL SECURITY;
+ALTER TABLE translations DISABLE ROW LEVEL SECURITY;
+
+-- Grant standard permissions
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
