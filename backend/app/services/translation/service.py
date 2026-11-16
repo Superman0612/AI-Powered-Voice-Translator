@@ -66,13 +66,14 @@ class NMTService:
             logger.warning(f"Fast neural translation gateway unavailable: {e}")
         return None
 
-    def _resolve_codes(self, src_lang: str, tgt_lang: str) -> tuple[str, str, str, str]:
+    def _resolve_codes(self, src_lang: Optional[str], tgt_lang: str) -> tuple[str, str, str, str]:
         """Resolves input language codes to both ISO and NLLB FLORES tokens."""
-        src_cfg = get_language_by_code(src_lang)
+        effective_src = src_lang or "en"
+        src_cfg = get_language_by_code(effective_src)
         tgt_cfg = get_language_by_code(tgt_lang)
 
         if not src_cfg:
-            raise ValueError(f"Source language '{src_lang}' is not supported. Supported: {list(SUPPORTED_LANGUAGES.keys())}")
+            raise ValueError(f"Source language '{effective_src}' is not supported. Supported: {list(SUPPORTED_LANGUAGES.keys())}")
         if not tgt_cfg:
             raise ValueError(f"Target language '{tgt_lang}' is not supported. Supported: {list(SUPPORTED_LANGUAGES.keys())}")
 
@@ -108,7 +109,8 @@ class NMTService:
 
         # Step 1: Normalize and resolve codes
         normalized_text = TextNormalizer.normalize_text(text)
-        src_iso, tgt_iso, src_nllb, tgt_nllb = self._resolve_codes(source_language, target_language)
+        effective_src: str = source_language or "en"
+        src_iso, tgt_iso, src_nllb, tgt_nllb = self._resolve_codes(effective_src, target_language)
 
         # Identity translation shortcut
         if src_iso == tgt_iso:
@@ -138,8 +140,10 @@ class NMTService:
 
         # Step 3: Local Transformer Fallback / Inference
         self._load_model()
+        if self._tokenizer is None or self._model is None:
+            raise RuntimeError("NMT model and tokenizer failed to initialize.")
 
-        # Step 3: Tokenize & Generate with forced BOS target language
+        # Step 4: Tokenize & Generate with forced BOS target language
         try:
             self._tokenizer.src_lang = src_nllb
             inputs = self._tokenizer(
