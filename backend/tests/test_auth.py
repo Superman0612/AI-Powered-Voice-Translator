@@ -20,7 +20,7 @@ def test_user_registration(client):
 
 def test_duplicate_email_registration_fails(client):
     payload = {
-        "email": "admin@bhashaai.org",
+        "email": "shubhamdevatwal2121@gmail.com",
         "username": f"admin_dup_{uuid.uuid4().hex[:4]}",
         "password": "Password123!"
     }
@@ -30,8 +30,8 @@ def test_duplicate_email_registration_fails(client):
 
 def test_login_success(client):
     payload = {
-        "email": "admin@bhashaai.org",
-        "password": "Admin@BhashaAI2026"
+        "email": "shubhamdevatwal2121@gmail.com",
+        "password": "Shubham@404"
     }
     response = client.post("/api/v1/auth/login/json", json=payload)
     assert response.status_code == status.HTTP_200_OK
@@ -41,7 +41,7 @@ def test_login_success(client):
 
 def test_login_invalid_password(client):
     payload = {
-        "email": "admin@bhashaai.org",
+        "email": "shubhamdevatwal2121@gmail.com",
         "password": "WrongPassword123"
     }
     response = client.post("/api/v1/auth/login/json", json=payload)

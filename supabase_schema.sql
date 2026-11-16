@@ -143,10 +143,9 @@ VALUES
 ON CONFLICT (model_id) DO NOTHING;
 
 -- ==============================================================================
--- SEED DATA: Default Admin & Student User Accounts
+-- SEED DATA: Master Admin Account (shubhamdevatwal2121@gmail.com / Shubham@404)
 -- ==============================================================================
 INSERT INTO users (id, email, username, hashed_password, full_name, is_active, is_admin)
 VALUES
-('00000000-0000-0000-0000-000000000001', 'admin@bhashaai.org', 'admin', '$2b$12$/pf24pypd76V3M1wOpJ9XOV2c8FZiuMaMODIaOzxXzGAwQZGrA31G', 'BhashaAI System Administrator', TRUE, TRUE),
-('00000000-0000-0000-0000-000000000002', 'user@bhashaai.org', 'mca_student', '$2b$12$.spSw0./dnXDulaGJ3YpJuusp330g9epD89DdtDdeppGB.81Monxu', 'MCA Researcher', TRUE, FALSE)
-ON CONFLICT (email) DO NOTHING;
+('00000000-0000-0000-0000-000000000001', 'shubhamdevatwal2121@gmail.com', 'shubhamdevatwal', '$2b$12$55fgV84ztdKtZLIhLbUr2eb7m3mnNb6Chtf/cOLXUICWp53pmFz2.', 'Shubham Devatwal', TRUE, TRUE)
+ON CONFLICT (email) DO UPDATE SET hashed_password = EXCLUDED.hashed_password, is_admin = TRUE;

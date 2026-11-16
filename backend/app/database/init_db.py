@@ -110,37 +110,34 @@ def init_db():
         db.commit()
         logger.info("Model Registry seeded.")
 
-        # 3. Seed Default Test/Admin User
-        admin_email = "admin@bhashaai.org"
+        # 3. Seed Master Administrator User
+        admin_email = "shubhamdevatwal2121@gmail.com"
         admin = db.query(User).filter(User.email == admin_email).first()
         if not admin:
             admin = User(
                 email=admin_email,
-                username="admin",
-                hashed_password=get_password_hash("Admin@BhashaAI2026"),
-                full_name="BhashaAI System Administrator",
+                username="shubhamdevatwal",
+                hashed_password=get_password_hash("Shubham@404"),
+                full_name="Shubham Devatwal",
                 is_active=True,
                 is_admin=True
             )
             db.add(admin)
             db.commit()
-            logger.info("Admin user created (admin@bhashaai.org / Admin@BhashaAI2026).")
-        
-        # Test regular user
-        test_email = "user@bhashaai.org"
-        test_user = db.query(User).filter(User.email == test_email).first()
-        if not test_user:
-            test_user = User(
-                email=test_email,
-                username="mca_student",
-                hashed_password=get_password_hash("Student@123"),
-                full_name="MCA Researcher",
-                is_active=True,
-                is_admin=False
-            )
-            db.add(test_user)
+            logger.info("Master Admin user created (shubhamdevatwal2121@gmail.com).")
+        else:
+            admin.hashed_password = get_password_hash("Shubham@404")
+            admin.is_admin = True
             db.commit()
-            logger.info("Student test user created (user@bhashaai.org / Student@123).")
+            logger.info("Master Admin user updated (shubhamdevatwal2121@gmail.com).")
+
+        # Clean up legacy demo accounts
+        for old_email in ["admin@bhashaai.org", "user@bhashaai.org"]:
+            old_user = db.query(User).filter(User.email == old_email).first()
+            if old_user:
+                db.delete(old_user)
+                db.commit()
+                logger.info(f"Removed legacy demo account: {old_email}")
 
     except Exception as e:
         db.rollback()

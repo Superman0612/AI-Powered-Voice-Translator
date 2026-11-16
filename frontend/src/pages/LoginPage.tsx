@@ -32,14 +32,9 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const fillDemoAccount = (role: 'admin' | 'student') => {
-    if (role === 'admin') {
-      setEmail('admin@bhashaai.org');
-      setPassword('Admin@BhashaAI2026');
-    } else {
-      setEmail('user@bhashaai.org');
-      setPassword('Student@123');
-    }
+  const fillAdminAccount = () => {
+    setEmail('shubhamdevatwal2121@gmail.com');
+    setPassword('Shubham@404');
   };
 
   return (
@@ -112,33 +107,22 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Demo Account Fillers */}
+        {/* Quick Admin Fill */}
         <div className="pt-2 border-t border-slate-800/80 space-y-2">
-          <p className="text-[11px] font-semibold text-slate-400 text-center uppercase tracking-wider">
-            Quick Fill Demo Credentials
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              type="button"
-              onClick={() => fillDemoAccount('admin')}
-              className="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 text-center font-medium transition-colors"
-            >
-              Admin Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => fillDemoAccount('student')}
-              className="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 text-center font-medium transition-colors"
-            >
-              Student Demo
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={fillAdminAccount}
+            className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 text-center font-medium text-xs transition-colors flex items-center justify-center gap-1.5"
+          >
+            <Lock className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Fill Master Admin Credentials</span>
+          </button>
         </div>
 
         <p className="text-center text-xs text-slate-400 pt-1">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-semibold text-indigo-400 hover:text-indigo-300">
-            Create an account
+          New Student or Researcher?{' '}
+          <Link to="/register" className="font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
+            Create your Profile
           </Link>
         </p>
       </div>
