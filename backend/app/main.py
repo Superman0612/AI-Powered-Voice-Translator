@@ -48,13 +48,15 @@ for 10 scheduled Indian languages:
     openapi_url="/api/v1/openapi.json"
 )
 
-# CORS Middleware
+# CORS Middleware: Permissive configuration supporting Vercel deployments, localhost, and preview domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=["*"],
+    allow_origin_regex=r".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Global Request Timing Middleware
