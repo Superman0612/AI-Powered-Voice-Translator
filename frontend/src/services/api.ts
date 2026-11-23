@@ -30,12 +30,12 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Don't auto-clear if it was a login attempt failure
-      if (!error.config?.url?.includes('/auth/login')) {
-        localStorage.removeItem('bhashaai_token');
-        localStorage.removeItem('bhashaai_user');
-      }
+    const isLoginOrRegister = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register');
+    const isUserNotFound = error.response?.status === 404 && String(error.response?.data?.detail || '').toLowerCase().includes('user');
+    
+    if ((error.response?.status === 401 || isUserNotFound) && !isLoginOrRegister) {
+      localStorage.removeItem('bhashaai_token');
+      localStorage.removeItem('bhashaai_user');
     }
     return Promise.reject(error);
   }

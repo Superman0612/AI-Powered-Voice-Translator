@@ -63,7 +63,7 @@ class Settings(BaseSettings):
     SAMPLE_RATE: int = 16000
     
     # AI/ML Configuration
-    WHISPER_MODEL_NAME: str = os.getenv("WHISPER_MODEL_NAME", "openai/whisper-small")
+    WHISPER_MODEL_NAME: str = os.getenv("WHISPER_MODEL_NAME", "openai/whisper-tiny")
     NMT_MODEL_NAME: str = os.getenv("NMT_MODEL_NAME", "facebook/nllb-200-distilled-600M")
     USE_GPU: bool = False
     

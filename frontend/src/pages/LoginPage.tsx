@@ -25,8 +25,13 @@ export const LoginPage: React.FC = () => {
       navigate(from, { replace: true });
     } catch (err: any) {
       console.error("Login failed:", err);
-      const detail = err.response?.data?.detail || err.message || "Invalid credentials. Please try again.";
-      setError(detail);
+      const detail = err.response?.data?.detail;
+      const errorMsg = typeof detail === 'string'
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ')
+          : err.message || "Invalid credentials. Please try again.";
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -101,6 +106,39 @@ export const LoginPage: React.FC = () => {
             )}
           </button>
         </form>
+
+        {/* Quick Admin Helper */}
+        <div className="pt-2 border-t border-slate-800/80 space-y-2.5">
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('shubhamdevatwal2121@gmail.com');
+                setPassword('Shubham@404');
+              }}
+              className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 text-center font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Lock className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Master Admin</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin');
+                setPassword('Shubham@404');
+              }}
+              className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 text-center font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Lock className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Quick Admin</span>
+            </button>
+          </div>
+          <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/60 text-[11px] text-slate-400 text-center space-y-0.5">
+            <p><span className="text-slate-500">Email:</span> <span className="text-indigo-300 font-mono">shubhamdevatwal2121@gmail.com</span></p>
+            <p><span className="text-slate-500">Username:</span> <span className="text-indigo-300 font-mono">shubhamdevatwal</span> or <span className="text-indigo-300 font-mono">admin</span></p>
+            <p><span className="text-slate-500">Password:</span> <span className="text-indigo-300 font-mono">Shubham@404</span></p>
+          </div>
+        </div>
 
         <p className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800/80">
           New Student or Researcher?{' '}

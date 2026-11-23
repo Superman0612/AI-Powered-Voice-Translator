@@ -40,8 +40,13 @@ export const RegisterPage: React.FC = () => {
       navigate('/translate', { replace: true });
     } catch (err: any) {
       console.error("Registration failed:", err);
-      const detail = err.response?.data?.detail || err.message || "Registration failed.";
-      setError(detail);
+      const detail = err.response?.data?.detail;
+      const errorMsg = typeof detail === 'string'
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ')
+          : err.message || "Registration failed. Please try again.";
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }

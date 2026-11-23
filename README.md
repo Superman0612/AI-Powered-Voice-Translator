@@ -234,6 +234,13 @@ npm run dev
 ```
 - Web Application: `http://localhost:5173`
 
+### 7. Default Credentials
+| Account Role | Username / Email | Password | Privileges |
+|:---|:---|:---|:---|
+| **Master Admin** | `shubhamdevatwal2121@gmail.com` | `Shubham@404` | Full System & Evaluation Oversight |
+| **Quick Admin** | `admin` | `Shubham@404` *(or `admin`)* | Administrator Access |
+| **Standard User** | Register via UI `/register` | User-defined | Individual Voice Translation Workspace |
+
 ---
 
 ## 📚 Complete Academic Thesis & Documentation

@@ -131,13 +131,25 @@ def init_db():
             db.commit()
             logger.info("Master Admin user updated (shubhamdevatwal2121@gmail.com).")
 
-        # Clean up legacy demo accounts
-        for old_email in ["admin@bhashaai.org", "user@bhashaai.org"]:
-            old_user = db.query(User).filter(User.email == old_email).first()
-            if old_user:
-                db.delete(old_user)
-                db.commit()
-                logger.info(f"Removed legacy demo account: {old_email}")
+        # 4. Seed Standard 'admin' user alias
+        std_admin = db.query(User).filter((User.username == "admin") | (User.email == "admin@bhashaai.org")).first()
+        if not std_admin:
+            std_admin = User(
+                email="admin@bhashaai.org",
+                username="admin",
+                hashed_password=get_password_hash("Shubham@404"),
+                full_name="BhashaAI Administrator",
+                is_active=True,
+                is_admin=True
+            )
+            db.add(std_admin)
+            db.commit()
+            logger.info("Standard Admin account created (admin / Shubham@404).")
+        else:
+            std_admin.hashed_password = get_password_hash("Shubham@404")
+            std_admin.is_admin = True
+            db.commit()
+            logger.info("Standard Admin account updated (admin / Shubham@404).")
 
     except Exception as e:
         db.rollback()

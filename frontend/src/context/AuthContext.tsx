@@ -50,12 +50,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const data = await api.auth.login(email, password);
+      const data = await api.auth.login(email.trim(), password);
       localStorage.setItem('bhashaai_token', data.access_token);
       setToken(data.access_token);
       const profile = await api.auth.getMe();
       setUser(profile);
       localStorage.setItem('bhashaai_user', JSON.stringify(profile));
+    } catch (err) {
+      localStorage.removeItem('bhashaai_token');
+      localStorage.removeItem('bhashaai_user');
+      setToken(null);
+      setUser(null);
+      throw err;
     } finally {
       setIsLoading(false);
     }

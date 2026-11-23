@@ -47,6 +47,16 @@ export const TranslatorPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<TranslationRecord | null>(null);
   const [latencies, setLatencies] = useState<{ asr_ms?: number; lid_ms?: number; nmt_ms?: number; tts_ms?: number; total_ms?: number }>({});
+  const stageTimersRef = React.useRef<number[]>([]);
+
+  const clearStageTimers = () => {
+    stageTimersRef.current.forEach((id) => clearTimeout(id));
+    stageTimersRef.current = [];
+  };
+
+  useEffect(() => {
+    return () => clearStageTimers();
+  }, []);
 
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -81,6 +91,7 @@ export const TranslatorPage: React.FC = () => {
   };
 
   const clearInputs = () => {
+    clearStageTimers();
     setRecordedBlob(null);
     setRecordedAudioUrl(null);
     setUploadedFile(null);
@@ -92,6 +103,7 @@ export const TranslatorPage: React.FC = () => {
   };
 
   const executeTranslation = async () => {
+    clearStageTimers();
     setErrorMessage(null);
 
     // MODE 1: Text Translation Mode
@@ -114,7 +126,8 @@ export const TranslatorPage: React.FC = () => {
         setStage('completed');
       } catch (err: any) {
         console.error("Text translation failed:", err);
-        setErrorMessage(err.response?.data?.detail || err.message || "Translation error occurred.");
+        const detail = err.response?.data?.detail || err.message || "Translation error occurred. Please verify backend server is running.";
+        setErrorMessage(detail);
         setStage('error');
       }
       return;
@@ -136,21 +149,22 @@ export const TranslatorPage: React.FC = () => {
     }
     formData.append('apply_denoise', String(applyDenoise));
 
-    // Progression through pipeline states
+    // Fast responsive pipeline progression
     setStage('uploading');
-    setTimeout(() => setStage('recognizing'), 400);
-    setTimeout(() => setStage('detecting'), 1000);
-    setTimeout(() => setStage('translating'), 1400);
-    setTimeout(() => setStage('synthesizing'), 1800);
+    stageTimersRef.current.push(window.setTimeout(() => setStage('recognizing'), 200));
+    stageTimersRef.current.push(window.setTimeout(() => setStage('translating'), 450));
+    stageTimersRef.current.push(window.setTimeout(() => setStage('synthesizing'), 700));
 
     try {
       const res = await api.translate.voice(formData);
+      clearStageTimers();
       setResult(res);
       setLatencies(res.latencies);
       setStage('completed');
     } catch (err: any) {
+      clearStageTimers();
       console.error("Voice translation pipeline error:", err);
-      const detail = err.response?.data?.detail || err.message || "Voice translation failed.";
+      const detail = err.response?.data?.detail || err.message || "Voice translation failed. Please verify backend server is running.";
       setErrorMessage(detail);
       setStage('error');
     }

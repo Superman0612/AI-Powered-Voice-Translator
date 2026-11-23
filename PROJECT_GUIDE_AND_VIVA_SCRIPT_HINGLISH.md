@@ -5,6 +5,7 @@
 > **Language:** Hinglish (Hindi explanation with standard English technical terms)  
 > **Generated PDF:** [BhashaAI_Project_Documentation_and_Script_Hinglish.pdf](file:///d:/sd/BhashaAI_Project_Documentation_and_Script_Hinglish.pdf)  
 > **Master Admin:** `shubhamdevatwal2121@gmail.com` | Password: `Shubham@404`  
+> **Quick Admin:** `admin` | Password: `Shubham@404` (ya `admin`)  
 > **Live GitHub Repo:** [Superman0612/AI-Powered-Voice-Translator](https://github.com/Superman0612/AI-Powered-Voice-Translator)
 
 ---

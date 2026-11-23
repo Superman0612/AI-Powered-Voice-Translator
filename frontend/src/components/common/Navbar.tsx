@@ -91,7 +91,7 @@ export const Navbar: React.FC = () => {
             {/* System Health Pill */}
             <div 
               className="flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800"
-              title={backendHealthy ? "FastAPI & PostgreSQL Backend: Operational" : "Backend connection check..."}
+              title={backendHealthy ? "FastAPI Backend: Operational (Port 8000)" : "Backend is offline! Start it with: python -m uvicorn app.main:app --port 8000"}
             >
               <span className="relative flex h-2 w-2">
                 {backendHealthy && (

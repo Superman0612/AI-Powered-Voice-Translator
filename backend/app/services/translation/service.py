@@ -56,7 +56,7 @@ class NMTService:
                 url,
                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
             )
-            with urllib.request.urlopen(req, timeout=3.5) as resp:
+            with urllib.request.urlopen(req, timeout=2.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 if data and isinstance(data, list) and len(data) > 0 and isinstance(data[0], list):
                     translated = "".join([part[0] for part in data[0] if part and len(part) > 0 and part[0]])

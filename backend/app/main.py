@@ -5,6 +5,7 @@ FastAPI Application Entry Point & Core Gateway
 
 import os
 import time
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -15,6 +16,20 @@ from app.api.v1.router import api_router
 from app.database.session import engine
 from app.database.base import Base
 from app.utils.logger import logger
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Modern lifespan event handler replacing deprecated @app.on_event('startup')
+    and @app.on_event('shutdown').
+    """
+    from app.database.init_db import init_db
+    try:
+        init_db()
+        logger.info("Database schema and core seed catalogs verified at application startup.")
+    except Exception as e:
+        logger.warning(f"Database startup initialization notice: {e}")
+    yield
 
 app = FastAPI(
     title="BhashaAI API",
@@ -45,7 +60,8 @@ for 10 scheduled Indian languages:
     version=settings.VERSION,
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url="/api/v1/openapi.json"
+    openapi_url="/api/v1/openapi.json",
+    lifespan=lifespan
 )
 
 # CORS Middleware: Permissive configuration supporting Vercel deployments, localhost, and preview domains
@@ -107,4 +123,3 @@ def health_redirect():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
-

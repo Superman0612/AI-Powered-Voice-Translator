@@ -25,7 +25,7 @@ class TTSService:
         text: str,
         target_language: str,
         voice_gender: str = "female",
-        prefer_local: bool = True
+        prefer_local: bool = False
     ) -> Dict[str, Any]:
         """
         Converts translated text into an audio file saved to storage.

@@ -77,9 +77,14 @@ export const ProcessingStatusCard: React.FC<ProcessingStatusCardProps> = ({
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
-          <p className="font-semibold mb-0.5">Backend Error Notice:</p>
+        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs space-y-1">
+          <p className="font-semibold">Backend Error Notice:</p>
           <p className="font-mono">{error}</p>
+          {(error.toLowerCase().includes('network') || error.toLowerCase().includes('failed to fetch') || error.toLowerCase().includes('running')) && (
+            <p className="text-[11px] text-indigo-300 bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+              💡 <b>Tip:</b> Make sure the backend server is running in your terminal: <code className="text-emerald-400 font-mono">python -m uvicorn app.main:app --port 8000</code>
+            </p>
+          )}
         </div>
       )}
 
