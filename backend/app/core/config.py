@@ -15,9 +15,36 @@ class Settings(BaseSettings):
     
     # Storage Paths
     BASE_DIR: str = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    STORAGE_DIR: str = os.path.join(BASE_DIR, "storage", "audio")
-    UPLOADS_DIR: str = os.path.join(STORAGE_DIR, "uploads")
-    GENERATED_DIR: str = os.path.join(STORAGE_DIR, "generated")
+    
+    @property
+    def STORAGE_DIR(self) -> str:
+        candidate = os.path.join(self.BASE_DIR, "storage", "audio")
+        try:
+            os.makedirs(os.path.join(candidate, "uploads"), exist_ok=True)
+            os.makedirs(os.path.join(candidate, "generated"), exist_ok=True)
+            test_file = os.path.join(candidate, ".write_test")
+            with open(test_file, "w") as f:
+                f.write("1")
+            os.remove(test_file)
+            return candidate
+        except Exception:
+            import tempfile
+            tmp = os.path.join(tempfile.gettempdir(), "bhashaai_storage", "audio")
+            os.makedirs(os.path.join(tmp, "uploads"), exist_ok=True)
+            os.makedirs(os.path.join(tmp, "generated"), exist_ok=True)
+            return tmp
+
+    @property
+    def UPLOADS_DIR(self) -> str:
+        p = os.path.join(self.STORAGE_DIR, "uploads")
+        os.makedirs(p, exist_ok=True)
+        return p
+
+    @property
+    def GENERATED_DIR(self) -> str:
+        p = os.path.join(self.STORAGE_DIR, "generated")
+        os.makedirs(p, exist_ok=True)
+        return p
 
     # Database & Supabase Configuration
     DATABASE_URL: Optional[str] = None

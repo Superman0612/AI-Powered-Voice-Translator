@@ -20,7 +20,11 @@ logger = logging.getLogger("bhashaai.services.asr")
 
 class ASRService:
     def __init__(self, model_name: Optional[str] = None):
-        self.model_name = model_name or settings.WHISPER_MODEL_NAME
+        chosen = model_name or settings.WHISPER_MODEL_NAME
+        # On cloud free-tier containers (like Render 512MB RAM), heavy models cause OOM / 502 Bad Gateway
+        if "small" in chosen.lower() or "medium" in chosen.lower() or "large" in chosen.lower():
+            chosen = "openai/whisper-tiny"
+        self.model_name = chosen
         self._pipeline = None
         self._is_loading = False
 

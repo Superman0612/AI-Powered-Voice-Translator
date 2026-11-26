@@ -149,11 +149,11 @@ export const TranslatorPage: React.FC = () => {
     }
     formData.append('apply_denoise', String(applyDenoise));
 
-    // Fast responsive pipeline progression
+    // Responsive pipeline progression
     setStage('uploading');
-    stageTimersRef.current.push(window.setTimeout(() => setStage('recognizing'), 200));
-    stageTimersRef.current.push(window.setTimeout(() => setStage('translating'), 450));
-    stageTimersRef.current.push(window.setTimeout(() => setStage('synthesizing'), 700));
+    stageTimersRef.current.push(window.setTimeout(() => setStage('recognizing'), 500));
+    stageTimersRef.current.push(window.setTimeout(() => setStage('translating'), 1400));
+    stageTimersRef.current.push(window.setTimeout(() => setStage('synthesizing'), 2400));
 
     try {
       const res = await api.translate.voice(formData);
