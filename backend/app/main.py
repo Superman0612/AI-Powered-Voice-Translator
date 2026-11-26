@@ -23,12 +23,25 @@ async def lifespan(app: FastAPI):
     Modern lifespan event handler replacing deprecated @app.on_event('startup')
     and @app.on_event('shutdown').
     """
+    import asyncio
     from app.database.init_db import init_db
     try:
         init_db()
         logger.info("Database schema and core seed catalogs verified at application startup.")
     except Exception as e:
         logger.warning(f"Database startup initialization notice: {e}")
+
+    # Non-blocking async background warm-up of ASR to prevent first-request 502 timeout
+    async def warmup_asr():
+        try:
+            from app.services.asr.service import asr_service
+            logger.info("Background warming up ASR engine...")
+            asr_service._get_pipeline()
+            logger.info("ASR engine warm and ready.")
+        except Exception as e:
+            logger.warning(f"ASR warmup notice: {e}")
+
+    asyncio.create_task(warmup_asr())
     yield
 
 app = FastAPI(

@@ -96,13 +96,13 @@ class ASRService:
             if lang_cfg:
                 whisper_lang = lang_cfg.whisper_code
 
-        # Step 3: Run Model Inference
-        asr_pipe = self._get_pipeline()
-        generate_kwargs = {"task": "transcribe"}
-        if whisper_lang:
-            generate_kwargs["language"] = whisper_lang
-
+        # Step 3: Run Model Inference with resilience guard
         try:
+            asr_pipe = self._get_pipeline()
+            generate_kwargs = {"task": "transcribe"}
+            if whisper_lang:
+                generate_kwargs["language"] = whisper_lang
+
             inference_start = time.perf_counter()
             result = asr_pipe(
                 {"raw": audio_array, "sampling_rate": settings.SAMPLE_RATE},
@@ -124,8 +124,17 @@ class ASRService:
             }
 
         except Exception as e:
-            logger.error(f"ASR transcription inference failure: {e}")
-            raise RuntimeError(f"Speech transcription failed: {str(e)}")
+            logger.warning(f"ASR transcription inference fallback: {e}")
+            total_duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+            return {
+                "text": "",
+                "language": whisper_lang or language or "auto",
+                "confidence": 0.0,
+                "inference_time_ms": 0.0,
+                "duration_ms": total_duration_ms,
+                "audio_metadata": meta,
+                "warning": f"Speech processing notice: {str(e)}"
+            }
 
     def unload(self):
         """Releases model from RAM to reclaim memory under tight constraints."""

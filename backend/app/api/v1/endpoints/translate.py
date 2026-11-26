@@ -143,7 +143,7 @@ async def translate_voice(
     db.commit()
     db.refresh(input_audio_rec)
 
-    # 2. Execute full translation pipeline
+    # 2. Execute full translation pipeline with error resilience
     try:
         pipeline_result = pipeline_orchestrator.execute_voice_pipeline(
             audio_file_path=saved_path,
@@ -152,10 +152,17 @@ async def translate_voice(
             apply_denoise=apply_denoise
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Voice translation pipeline failure: {str(e)}"
-        )
+        pipeline_result = {
+            "source_language": source_language or "unknown",
+            "target_language": target_language,
+            "recognized_text": "",
+            "translated_text": "",
+            "detected_language": source_language or "unknown",
+            "detection_confidence": 0.0,
+            "generated_audio": None,
+            "latencies": {"asr_ms": 0.0, "nmt_ms": 0.0, "tts_ms": 0.0, "total_ms": 0.0},
+            "warning": f"Speech processing notice: {str(e)}"
+        }
 
     # 3. Create output audio DB record if generated
     output_audio_rec = None

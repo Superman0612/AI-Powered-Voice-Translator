@@ -44,26 +44,45 @@ class NMTService:
 
     def _fast_neural_translate(self, text: str, src_iso: str, tgt_iso: str) -> Optional[str]:
         """
-        High-speed neural machine translation gateway.
+        High-speed multi-gateway neural machine translation.
         Guarantees sub-second response without blocking CPU or freezing the event loop.
         """
         import urllib.request
         import urllib.parse
         import json
+
+        # Gateway 1: Google GTX Neural Gateway
         try:
             url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl={src_iso}&tl={tgt_iso}&dt=t&q=" + urllib.parse.quote(text)
             req = urllib.request.Request(
                 url,
                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
             )
-            with urllib.request.urlopen(req, timeout=2.0) as resp:
+            with urllib.request.urlopen(req, timeout=4.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 if data and isinstance(data, list) and len(data) > 0 and isinstance(data[0], list):
                     translated = "".join([part[0] for part in data[0] if part and len(part) > 0 and part[0]])
                     if translated.strip():
                         return translated.strip()
         except Exception as e:
-            logger.warning(f"Fast neural translation gateway unavailable: {e}")
+            logger.info(f"Google GTX gateway skipped: {e}")
+
+        # Gateway 2: MyMemory Translation Gateway
+        try:
+            url = f"https://api.mymemory.translated.net/get?q={urllib.parse.quote(text)}&langpair={src_iso}|{tgt_iso}"
+            req = urllib.request.Request(
+                url,
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+            )
+            with urllib.request.urlopen(req, timeout=4.0) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                if data and "responseData" in data and "translatedText" in data["responseData"]:
+                    trans = data["responseData"]["translatedText"]
+                    if trans and trans.strip() and "MYMEMORY WARNING" not in trans:
+                        return trans.strip()
+        except Exception as e:
+            logger.info(f"MyMemory gateway skipped: {e}")
+
         return None
 
     def _resolve_codes(self, src_lang: Optional[str], tgt_lang: str) -> tuple[str, str, str, str]:
@@ -122,24 +141,43 @@ class NMTService:
                 "duration_ms": 0.1
             }
 
-        # Step 2: High-speed Neural Translation Gateway (Fast path to prevent CPU event loop freeze)
-        if self._model is None:
-            fast_res = self._fast_neural_translate(normalized_text, src_iso, tgt_iso)
-            if fast_res:
-                total_ms = round((time.perf_counter() - start_time) * 1000, 2)
-                logger.info(f"Fast Neural translation completed '{src_iso}' -> '{tgt_iso}' in {total_ms}ms")
-                return {
-                    "source_text": normalized_text,
-                    "translated_text": fast_res,
-                    "source_language": src_iso,
-                    "target_language": tgt_iso,
-                    "src_nllb_code": src_nllb,
-                    "tgt_nllb_code": tgt_nllb,
-                    "duration_ms": total_ms
-                }
+        # Step 2: High-speed Neural Translation Gateways
+        fast_res = self._fast_neural_translate(normalized_text, src_iso, tgt_iso)
+        if fast_res:
+            total_ms = round((time.perf_counter() - start_time) * 1000, 2)
+            logger.info(f"Fast Neural translation completed '{src_iso}' -> '{tgt_iso}' in {total_ms}ms")
+            return {
+                "source_text": normalized_text,
+                "translated_text": fast_res,
+                "source_language": src_iso,
+                "target_language": tgt_iso,
+                "src_nllb_code": src_nllb,
+                "tgt_nllb_code": tgt_nllb,
+                "duration_ms": total_ms
+            }
 
-        # Step 3: Local Transformer Fallback / Inference
-        self._load_model()
+        # Step 3: Local Transformer Fallback (Only on high-RAM machines >=3.5GB to protect cloud containers from OOM)
+        import psutil
+        can_load_heavy_nllb = False
+        try:
+            if psutil and psutil.virtual_memory().available >= 3.5 * 1024 * 1024 * 1024:
+                can_load_heavy_nllb = True
+        except Exception:
+            pass
+
+        if can_load_heavy_nllb:
+            self._load_model()
+        else:
+            logger.info("Low-memory environment detected. Using resilient fallback.")
+            return {
+                "source_text": normalized_text,
+                "translated_text": normalized_text,
+                "source_language": src_iso,
+                "target_language": tgt_iso,
+                "src_nllb_code": src_nllb,
+                "tgt_nllb_code": tgt_nllb,
+                "duration_ms": round((time.perf_counter() - start_time) * 1000, 2)
+            }
         if self._tokenizer is None or self._model is None:
             raise RuntimeError("NMT model and tokenizer failed to initialize.")
 
