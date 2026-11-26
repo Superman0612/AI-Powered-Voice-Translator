@@ -24,9 +24,10 @@ export const TranslationResultCard: React.FC<TranslationResultCardProps> = ({
     if (!partialUrl) return '';
     if (partialUrl.startsWith('http')) return partialUrl;
     // Map relative url to backend base
-    const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const base = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').trim().replace(/\/+$/, '');
     const cleanBase = base.endsWith('/api/v1') ? base.replace('/api/v1', '') : base;
-    return `${cleanBase}${partialUrl}`;
+    const cleanPartial = partialUrl.startsWith('/') ? partialUrl : `/${partialUrl}`;
+    return `${cleanBase}${cleanPartial}`;
   };
 
   return (

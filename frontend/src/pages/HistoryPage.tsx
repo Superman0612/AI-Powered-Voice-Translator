@@ -49,9 +49,10 @@ export const HistoryPage: React.FC = () => {
   const getAudioUrl = (partialUrl?: string) => {
     if (!partialUrl) return '';
     if (partialUrl.startsWith('http')) return partialUrl;
-    const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const base = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').trim().replace(/\/+$/, '');
     const cleanBase = base.endsWith('/api/v1') ? base.replace('/api/v1', '') : base;
-    return `${cleanBase}${partialUrl}`;
+    const cleanPartial = partialUrl.startsWith('/') ? partialUrl : `/${partialUrl}`;
+    return `${cleanBase}${cleanPartial}`;
   };
 
   const filteredHistory = history.filter((item) => {

@@ -8,7 +8,16 @@ import type {
   EvaluationSummary
 } from '../types';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const resolveApiBaseUrl = (): string => {
+  let url = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1').trim();
+  url = url.replace(/\/+$/, '');
+  if (!url.endsWith('/api/v1')) {
+    url = `${url}/api/v1`;
+  }
+  return url;
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

@@ -84,8 +84,9 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time-Ms"] = str(process_time)
     return response
 
-# Mount API V1 Router
+# Mount API V1 Router (primary with prefix, secondary without prefix for flexible cloud deployments)
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(api_router)
 
 # Global Exception Handlers
 @app.exception_handler(Exception)
