@@ -156,28 +156,29 @@ class NMTService:
                 "duration_ms": total_ms
             }
 
-        # Step 3: Local Transformer Fallback (Only on high-RAM machines >=3.5GB to protect cloud containers from OOM)
-        import psutil
-        can_load_heavy_nllb = False
-        try:
-            if psutil and psutil.virtual_memory().available >= 3.5 * 1024 * 1024 * 1024:
-                can_load_heavy_nllb = True
-        except Exception:
-            pass
+        # Step 3: Local Transformer Fallback / Inference
+        if self._model is None:
+            import psutil
+            can_load_heavy_nllb = False
+            try:
+                if psutil and psutil.virtual_memory().available >= 3.5 * 1024 * 1024 * 1024:
+                    can_load_heavy_nllb = True
+            except Exception:
+                pass
 
-        if can_load_heavy_nllb:
-            self._load_model()
-        else:
-            logger.info("Low-memory environment detected. Using resilient fallback.")
-            return {
-                "source_text": normalized_text,
-                "translated_text": normalized_text,
-                "source_language": src_iso,
-                "target_language": tgt_iso,
-                "src_nllb_code": src_nllb,
-                "tgt_nllb_code": tgt_nllb,
-                "duration_ms": round((time.perf_counter() - start_time) * 1000, 2)
-            }
+            if can_load_heavy_nllb:
+                self._load_model()
+            else:
+                logger.info("Low-memory environment detected. Using resilient fallback.")
+                return {
+                    "source_text": normalized_text,
+                    "translated_text": normalized_text,
+                    "source_language": src_iso,
+                    "target_language": tgt_iso,
+                    "src_nllb_code": src_nllb,
+                    "tgt_nllb_code": tgt_nllb,
+                    "duration_ms": round((time.perf_counter() - start_time) * 1000, 2)
+                }
         if self._tokenizer is None or self._model is None:
             raise RuntimeError("NMT model and tokenizer failed to initialize.")
 

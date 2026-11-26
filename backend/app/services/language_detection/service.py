@@ -65,7 +65,7 @@ class LanguageDetectionService:
 
         # Primary script determination
         if script_dist:
-            primary_script = max(script_dist, key=script_dist.get)
+            primary_script = max(script_dist, key=lambda k: script_dist[k])
             script_confidence = script_dist[primary_script]
         else:
             primary_script = "Latin"

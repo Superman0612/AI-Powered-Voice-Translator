@@ -112,7 +112,13 @@ class ASRService:
             inference_time_ms = round((time.perf_counter() - inference_start) * 1000, 2)
             total_duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
 
-            recognized_text = result.get("text", "").strip()
+            if isinstance(result, list) and len(result) > 0:
+                first_item = result[0]
+                recognized_text = first_item.get("text", "").strip() if isinstance(first_item, dict) else str(first_item).strip()
+            elif isinstance(result, dict):
+                recognized_text = result.get("text", "").strip()
+            else:
+                recognized_text = str(result).strip() if result else ""
 
             return {
                 "text": recognized_text,

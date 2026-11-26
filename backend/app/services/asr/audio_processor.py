@@ -73,7 +73,7 @@ class AudioProcessor:
         if orig_sr == target_sr:
             return audio
 
-        num_target_samples = int(round(len(audio) * float(target_sr) / orig_sr))
+        num_target_samples = round(len(audio) * float(target_sr) / orig_sr)
         if num_target_samples == 0:
             return np.array([], dtype=np.float32)
 
