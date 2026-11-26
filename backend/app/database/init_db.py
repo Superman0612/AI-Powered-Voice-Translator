@@ -112,11 +112,13 @@ def init_db():
 
         # 3. Seed Master Administrator User
         admin_email = "shubhamdevatwal2121@gmail.com"
-        admin = db.query(User).filter(User.email == admin_email).first()
+        admin = db.query(User).filter(
+            (User.email == admin_email) | (User.username == "Superman0612") | (User.username == "shubhamdevatwal")
+        ).first()
         if not admin:
             admin = User(
                 email=admin_email,
-                username="shubhamdevatwal",
+                username="Superman0612",
                 hashed_password=get_password_hash("Shubham@404"),
                 full_name="Shubham Devatwal",
                 is_active=True,
@@ -124,12 +126,14 @@ def init_db():
             )
             db.add(admin)
             db.commit()
-            logger.info("Master Admin user created (shubhamdevatwal2121@gmail.com).")
+            logger.info("Master Admin user created (Superman0612 / shubhamdevatwal2121@gmail.com).")
         else:
+            admin.email = admin_email
+            admin.username = "Superman0612"
             admin.hashed_password = get_password_hash("Shubham@404")
             admin.is_admin = True
             db.commit()
-            logger.info("Master Admin user updated (shubhamdevatwal2121@gmail.com).")
+            logger.info("Master Admin user updated (Superman0612 / shubhamdevatwal2121@gmail.com).")
 
         # 4. Seed Standard 'admin' user alias
         std_admin = db.query(User).filter((User.username == "admin") | (User.email == "admin@bhashaai.org")).first()

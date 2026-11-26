@@ -5,6 +5,14 @@ from app.core.config import settings
 # Standard sync engine for FastAPI endpoints
 db_uri = settings.SQLALCHEMY_DATABASE_URI
 if "sqlite" in db_uri:
+    import os
+    clean_path = db_uri.replace("sqlite:////", "/").replace("sqlite:///", "")
+    target_dir = os.path.dirname(clean_path)
+    if target_dir:
+        try:
+            os.makedirs(target_dir, exist_ok=True)
+        except Exception:
+            pass
     engine = create_engine(
         db_uri,
         connect_args={"check_same_thread": False}

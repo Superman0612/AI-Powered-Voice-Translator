@@ -124,7 +124,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                setEmail('admin');
+                setEmail('Superman0612');
                 setPassword('Shubham@404');
               }}
               className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 text-center font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
@@ -135,7 +135,7 @@ export const LoginPage: React.FC = () => {
           </div>
           <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/60 text-[11px] text-slate-400 text-center space-y-0.5">
             <p><span className="text-slate-500">Email:</span> <span className="text-indigo-300 font-mono">shubhamdevatwal2121@gmail.com</span></p>
-            <p><span className="text-slate-500">Username:</span> <span className="text-indigo-300 font-mono">shubhamdevatwal</span> or <span className="text-indigo-300 font-mono">admin</span></p>
+            <p><span className="text-slate-500">Username:</span> <span className="text-indigo-300 font-mono">Superman0612</span> or <span className="text-indigo-300 font-mono">admin</span></p>
             <p><span className="text-slate-500">Password:</span> <span className="text-indigo-300 font-mono">Shubham@404</span></p>
           </div>
         </div>

@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        url = self.DATABASE_URL or os.getenv("DATABASE_URL")
+        url = (self.DATABASE_URL or os.getenv("DATABASE_URL") or "").strip()
         if url:
             # Normalize Supabase / PostgreSQL URI for psycopg2
             if url.startswith("postgres://"):
@@ -45,10 +45,52 @@ class Settings(BaseSettings):
             if ("supabase.co" in url or "supabase.com" in url or "pooler.supabase.com" in url) and "sslmode" not in url:
                 delimiter = "&" if "?" in url else "?"
                 url = f"{url}{delimiter}sslmode=require"
-            return url
+            
+            if url.startswith("postgresql"):
+                return url
+                
+            # If it's a SQLite URL with a Windows drive (e.g. D:/...) on Linux (like Render):
+            if "sqlite" in url:
+                import platform
+                if platform.system() != "Windows" and (":/" in url or ":\\" in url):
+                    url = ""  # Discard invalid Windows drive path on Linux
+
+        if url and url.startswith("sqlite"):
+            # Check if specified SQLite path is writable
+            raw_path = url.replace("sqlite:////", "/").replace("sqlite:///", "")
+            target_dir = os.path.dirname(raw_path)
+            if target_dir:
+                try:
+                    os.makedirs(target_dir, exist_ok=True)
+                    test_f = os.path.join(target_dir, ".test_perm")
+                    with open(test_f, "w") as f:
+                        f.write("1")
+                    os.remove(test_f)
+                    return url
+                except Exception:
+                    pass
+            else:
+                return url
+
         if self.USE_POSTGRES:
             return f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-        db_path = os.path.join(self.BASE_DIR, "bhashaai.db").replace("\\", "/")
+            
+        # SQLite guaranteed writable fallback:
+        # Check if BASE_DIR is writable (fails on Render Linux where src is read-only)
+        candidate_dir = self.BASE_DIR
+        try:
+            os.makedirs(candidate_dir, exist_ok=True)
+            test_file = os.path.join(candidate_dir, ".test_write_perm")
+            with open(test_file, "w") as f:
+                f.write("ok")
+            os.remove(test_file)
+        except Exception:
+            import tempfile
+            candidate_dir = tempfile.gettempdir()
+
+        db_path = os.path.join(candidate_dir, "bhashaai.db").replace("\\", "/")
+        if db_path.startswith("/"):
+            return f"sqlite:////{db_path.lstrip('/')}"
         return f"sqlite:///{db_path}"
     
     @property

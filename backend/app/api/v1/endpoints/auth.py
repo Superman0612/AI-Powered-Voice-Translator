@@ -54,12 +54,25 @@ def login(
 ) -> Any:
     """OAuth2 compatible token login for Swagger UI and API consumers."""
     identifier = form_data.username.strip().lower()
-    user = db.query(User).filter(
-        (func.lower(User.username) == identifier) | (func.lower(User.email) == identifier)
-    ).first()
+    try:
+        user = db.query(User).filter(
+            (func.lower(User.username) == identifier) | (func.lower(User.email) == identifier)
+        ).first()
+    except Exception:
+        from app.database.init_db import init_db
+        try:
+            init_db()
+            user = db.query(User).filter(
+                (func.lower(User.username) == identifier) | (func.lower(User.email) == identifier)
+            ).first()
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database initialization error: {str(e)}"
+            )
 
-    # Fallback alias for 'admin' or 'admin@bhashaai.org' to master admin if not found directly
-    if not user and identifier in ["admin", "admin@bhashaai.org"]:
+    # Fallback alias for admin identifiers
+    if not user and identifier in ["admin", "admin@bhashaai.org", "superman0612", "shubhamdevatwal", "shubhamdevatwal2121@gmail.com"]:
         user = db.query(User).filter(User.is_admin == True).first()
 
     is_valid_pw = False
@@ -94,12 +107,25 @@ def login(
 def login_json(user_in: UserLogin, db: Session = Depends(get_db)) -> Any:
     """JSON body login endpoint."""
     identifier = user_in.email.strip().lower()
-    user = db.query(User).filter(
-        (func.lower(User.email) == identifier) | (func.lower(User.username) == identifier)
-    ).first()
+    try:
+        user = db.query(User).filter(
+            (func.lower(User.email) == identifier) | (func.lower(User.username) == identifier)
+        ).first()
+    except Exception:
+        from app.database.init_db import init_db
+        try:
+            init_db()
+            user = db.query(User).filter(
+                (func.lower(User.email) == identifier) | (func.lower(User.username) == identifier)
+            ).first()
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database initialization error: {str(e)}"
+            )
 
-    # Fallback alias for 'admin' or 'admin@bhashaai.org' to master admin if not found directly
-    if not user and identifier in ["admin", "admin@bhashaai.org"]:
+    # Fallback alias for admin identifiers
+    if not user and identifier in ["admin", "admin@bhashaai.org", "superman0612", "shubhamdevatwal", "shubhamdevatwal2121@gmail.com"]:
         user = db.query(User).filter(User.is_admin == True).first()
 
     is_valid_pw = False
